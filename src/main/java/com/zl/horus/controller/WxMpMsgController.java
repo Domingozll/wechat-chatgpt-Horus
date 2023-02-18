@@ -1,6 +1,7 @@
-package com.honghu.wxmp_chat.controller;
+package com.zhanglin.wx_chatgpt.controller;
 
-import com.honghu.wxmp_chat.service.ChatGptServiceImpl;
+import com.zhanglin.wx_chatgpt.service.ChatGptServiceImpl;
+import io.lettuce.core.dynamic.annotation.Param;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.mp.api.WxMpService;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -51,6 +53,11 @@ public class WxMpMsgController {
         return echostr;
     }
 
+    @GetMapping("/test")
+    public String test(@Param("msg") String msg) {
+        return chatGptService.reply(msg, "test");
+    }
+
     /**
      * 被动回复用户消息
      *
@@ -63,22 +70,22 @@ public class WxMpMsgController {
 
         //获取消息流,并解析xml
         WxMpXmlMessage message = WxMpXmlMessage.fromXml(request.getInputStream());
-        System.out.println(message.toString());
+        log.info(message.toString());
         //消息类型
         String messageType = message.getMsgType();
-        System.out.println("消息类型:" + messageType);
+        log.info("消息类型:" + messageType);
         //发送者帐号
         String fromUser = message.getFromUser();
-        System.out.println("发送者账号：" + fromUser);
+        log.info("发送者账号：" + fromUser);
         //开发者微信号
         String touser = message.getToUser();
-        System.out.println("开发者微信：" + touser);
+        log.info("开发者微信：" + touser);
         //文本消息  文本内容
         String text = message.getContent();
-        System.out.println("文本消息：" + text);
+        log.info("文本消息：" + text);
         // 事件推送
         if (messageType.equals("event")) {
-            System.out.println("event：" + message.getEvent());
+            log.info("event：" + message.getEvent());
             // 关注
             if (message.getEvent().equals("subscribe")) {
                 log.info("用户关注：{}", fromUser);
@@ -86,12 +93,12 @@ public class WxMpMsgController {
                         .TEXT()
                         .toUser(fromUser)
                         .fromUser(touser)
-                        .content("谢谢你长的这么好看还关注我~~我是贴心的小小鹏有问题尽管提问我好了！！")
+                        .content("Thanks for subscribe.Ask me anything.")
                         .build();
 
                 String result = texts.toXml();
 
-                System.out.println("响应给用户的消息：" + result);
+                log.info("响应给用户的消息：" + result);
 
                 return result;
             }
@@ -123,10 +130,10 @@ public class WxMpMsgController {
                     .TEXT()
                     .toUser(fromUser)
                     .fromUser(touser)
-                    .content( chatGptService.reply(text, fromUser))
+                    .content(chatGptService.reply(text, fromUser))
                     .build();
             String result = texts.toXml();
-            System.out.println("响应给用户的消息：" + result);
+            log.info("响应给用户的消息：" + result);
             return result;
         }
         //图片消息
@@ -139,7 +146,7 @@ public class WxMpMsgController {
                     .build();
             String result = texts.toXml();
             result.replace("你发送的消息为： ", "");
-            System.out.println("响应给用户的消息：" + result);
+            log.info("响应给用户的消息：" + result);
             return result;
         }
         /**
@@ -153,7 +160,7 @@ public class WxMpMsgController {
                     .content("已接收到您发的语音信息")
                     .build();
             String result = texts.toXml();
-            System.out.println("响应给用户的消息：" + result);
+            log.info("响应给用户的消息：" + result);
             return result;
         }
         /**
@@ -167,7 +174,7 @@ public class WxMpMsgController {
                     .content("已接收到您发的视频信息")
                     .build();
             String result = texts.toXml();
-            System.out.println("响应给用户的消息：" + result);
+            log.info("响应给用户的消息：" + result);
             return result;
         }
         /**
@@ -181,7 +188,7 @@ public class WxMpMsgController {
                     .content("已接收到您发的小视频信息")
                     .build();
             String result = texts.toXml();
-            System.out.println("响应给用户的消息：" + result);
+            log.info("响应给用户的消息：" + result);
             return result;
         }
         /**
@@ -195,7 +202,7 @@ public class WxMpMsgController {
                     .content("已接收到您发的地理位置信息")
                     .build();
             String result = texts.toXml();
-            System.out.println("响应给用户的消息：" + result);
+            log.info("响应给用户的消息：" + result);
             return result;
         }
         /**
@@ -209,11 +216,12 @@ public class WxMpMsgController {
                     .content("已接收到您发的链接信息")
                     .build();
             String result = texts.toXml();
-            System.out.println("响应给用户的消息：" + result);
+            log.info("响应给用户的消息：" + result);
             return result;
         }
         return null;
     }
+
 
 //    public void kefuMessage(String toUser, String content) throws WxErrorException {
 //        WxMpKefuMessage message = new WxMpKefuMessage();

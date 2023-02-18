@@ -1,4 +1,4 @@
-package com.honghu.wxmp_chat.service;
+package com.zhanglin.wx_chatgpt.service;
 
 /**
  * @author honghu

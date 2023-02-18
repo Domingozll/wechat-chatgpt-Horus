@@ -1,4 +1,4 @@
-package com.honghu.wxmp_chat.utils;
+package com.zhanglin.wx_chatgpt.utils;
 
 import okhttp3.*;
 import okhttp3.Request.Builder;

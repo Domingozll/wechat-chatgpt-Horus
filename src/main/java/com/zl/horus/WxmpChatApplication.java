@@ -1,4 +1,4 @@
-package com.honghu.wxmp_chat;
+package com.zhanglin.wx_chatgpt;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

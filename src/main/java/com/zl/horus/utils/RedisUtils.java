@@ -1,4 +1,4 @@
-package com.honghu.wxmp_chat.utils;
+package com.zhanglin.wx_chatgpt.utils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -282,11 +282,11 @@ public class RedisUtils {
      * @date 2020/3/8 16:27:41
      */
     public  String get(String key) {
-        log.info("get(...) => key -> {}", key);
+//        log.info("get(...) => key -> {}", key);
             Boolean hasValue = redisTemplate.hasKey(key);
         if (hasValue) {
             String result = (String)redisTemplate.opsForValue().get(key);
-            log.info("get(...) => result -> {} ", result);
+//            log.info("get(...) => result -> {} ", result);
             return result;
         }
         return null;
@@ -305,9 +305,9 @@ public class RedisUtils {
      * @date 2020/3/8 18:08:45
      */
     public  String getRange(String key, long start, long end) {
-        log.info("getRange(...) => kry -> {}", key);
+//        log.info("getRange(...) => kry -> {}", key);
         String result = redisTemplate.opsForValue().get(key, start, end);
-        log.info("getRange(...) => result -> {} ", result);
+//        log.info("getRange(...) => result -> {} ", result);
         return result;
     }
 

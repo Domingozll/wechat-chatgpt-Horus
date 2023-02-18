@@ -1,4 +1,4 @@
-package com.honghu.wxmp_chat.entity;
+package com.zhanglin.wx_chatgpt.entity;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import lombok.Data;

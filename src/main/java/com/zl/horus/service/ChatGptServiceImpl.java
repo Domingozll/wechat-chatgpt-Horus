@@ -1,12 +1,12 @@
-package com.honghu.wxmp_chat.service;
+package com.zhanglin.wx_chatgpt.service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.honghu.wxmp_chat.entity.MessageResponseBody;
-import com.honghu.wxmp_chat.entity.MessageSendBody;
-import com.honghu.wxmp_chat.utils.HttpUtil;
-import com.honghu.wxmp_chat.utils.RedisUtils;
+import com.zhanglin.wx_chatgpt.entity.MessageResponseBody;
+import com.zhanglin.wx_chatgpt.entity.MessageSendBody;
+import com.zhanglin.wx_chatgpt.utils.HttpUtil;
+import com.zhanglin.wx_chatgpt.utils.RedisUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -41,12 +41,12 @@ public class ChatGptServiceImpl implements ChatGptService {
     /**
      * 定义ai的名字
      */
-    private final String Ai = "小小鹏:";
+    private final String Ai = "Horus:";
 
     @Override
     public String reply(String messageContent, String userKey) {
         // 默认信息
-        String message = "Human:你好\n小小鹏:你好\n";
+        String message = "Human:你好\nHorus:你好\n";
         RedisUtils redisUtils = new RedisUtils(stringRedisTemplate);
         if (redisUtils.hasKey(userKey)) {
             // 如果存在key，拿出来
@@ -68,7 +68,8 @@ public class ChatGptServiceImpl implements ChatGptService {
                     msg = msg + Ai + replyText + "\n";
                     redisUtils.setEx(userKey, msg, 60, TimeUnit.SECONDS);
                 }).start();
-                return replyText.replace("小小鹏:", "");
+                return replyText.replace("Horus:", "")
+                        .replace("Horus:", "");
             }
         }
         return "暂时不明白你说什么!";
@@ -103,7 +104,7 @@ public class ChatGptServiceImpl implements ChatGptService {
         messageSendBody.setFrequencyPenalty(0.0);
         messageSendBody.setPresencePenalty(0.6);
         List<String> stop = new ArrayList<>();
-        stop.add(" 小小鹏:");
+        stop.add(" Horus:");
         stop.add(" Human:");
         messageSendBody.setStop(stop);
         return messageSendBody;
@@ -133,7 +134,7 @@ public class ChatGptServiceImpl implements ChatGptService {
         if (messageResponseBody != null) {
             if (!CollectionUtils.isEmpty(messageResponseBody.getChoices())) {
                 String replyText = messageResponseBody.getChoices().get(0).getText();
-                return replyText.replace("小小鹏:", "");
+                return replyText.replace("Horus:", "");
             }
         }
         return "暂时不明白你说什么!";

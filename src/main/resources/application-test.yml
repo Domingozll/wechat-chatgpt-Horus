@@ -1,5 +1,6 @@
+
 wx:
   mp:
-    app-id: your appid
-    secret: your secret
-    token: your token
+    app-id: wx117704dd1f80295e
+    secret: 43d423181504c42579d431e9584eced2
+    token: zhanglin
