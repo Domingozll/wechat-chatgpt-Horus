@@ -1,4 +1,4 @@
-package com.zhanglin.wx_chatgpt.entity;
+package com.zl.horus.entity;
 
 import lombok.Data;
 

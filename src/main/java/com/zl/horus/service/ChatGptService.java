@@ -1,4 +1,4 @@
-package com.zhanglin.wx_chatgpt.service;
+package com.zl.horus.service;
 
 /**
  * @author honghu

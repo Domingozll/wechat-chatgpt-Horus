@@ -1,12 +1,12 @@
-package com.zhanglin.wx_chatgpt.service;
+package com.zl.horus.service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.zhanglin.wx_chatgpt.entity.MessageResponseBody;
-import com.zhanglin.wx_chatgpt.entity.MessageSendBody;
-import com.zhanglin.wx_chatgpt.utils.HttpUtil;
-import com.zhanglin.wx_chatgpt.utils.RedisUtils;
+import com.zl.horus.entity.MessageResponseBody;
+import com.zl.horus.entity.MessageSendBody;
+import com.zl.horus.utils.HttpUtil;
+import com.zl.horus.utils.RedisUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;

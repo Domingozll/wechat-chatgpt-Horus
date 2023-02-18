@@ -1,4 +1,4 @@
-package com.zhanglin.wx_chatgpt.utils;
+package com.zl.horus.utils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;

@@ -1,6 +1,6 @@
-package com.zhanglin.wx_chatgpt.controller;
+package com.zl.horus.controller;
 
-import com.zhanglin.wx_chatgpt.service.ChatGptServiceImpl;
+import com.zl.horus.service.ChatGptServiceImpl;
 import io.lettuce.core.dynamic.annotation.Param;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.error.WxErrorException;
@@ -70,7 +70,7 @@ public class WxMpMsgController {
 
         //获取消息流,并解析xml
         WxMpXmlMessage message = WxMpXmlMessage.fromXml(request.getInputStream());
-        log.info(message.toString());
+        log.info("微信入参：{}", message.toString());
         //消息类型
         String messageType = message.getMsgType();
         log.info("消息类型:" + messageType);

@@ -1,4 +1,4 @@
-package com.zhanglin.wx_chatgpt.utils;
+package com.zl.horus.utils;
 
 import okhttp3.*;
 import okhttp3.Request.Builder;

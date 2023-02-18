@@ -1,4 +1,4 @@
-package com.zhanglin.wx_chatgpt;
+package com.zl.horus;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
