@@ -1,12 +1,16 @@
 package com.zl.horus.controller;
 
 import com.zl.horus.service.ChatGptServiceImpl;
+import com.zl.horus.utils.HashUtils;
+import com.zl.horus.utils.RedisUtils;
 import io.lettuce.core.dynamic.annotation.Param;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.mp.api.WxMpService;
 import me.chanjar.weixin.mp.bean.message.WxMpXmlMessage;
 import me.chanjar.weixin.mp.bean.message.WxMpXmlOutTextMessage;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -32,6 +37,9 @@ public class WxMpMsgController {
 
     @Resource
     private ChatGptServiceImpl chatGptService;
+
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
 
     /**
      * 消息校验，确定是微信发送的消息
@@ -55,7 +63,7 @@ public class WxMpMsgController {
 
     @GetMapping("/test")
     public String test(@Param("msg") String msg) {
-        return chatGptService.reply(msg, "test");
+        return chatGptService.reply(msg, "test", "");
     }
 
     /**
@@ -66,23 +74,30 @@ public class WxMpMsgController {
      * @throws Exception
      */
     @PostMapping
-    public String post(HttpServletRequest request) throws IOException, WxErrorException {
-
-        //获取消息流,并解析xml
+    public String post(HttpServletRequest request) throws IOException, WxErrorException, InterruptedException {
         WxMpXmlMessage message = WxMpXmlMessage.fromXml(request.getInputStream());
-        log.info("微信入参：{}", message.toString());
-        //消息类型
         String messageType = message.getMsgType();
-        log.info("消息类型:" + messageType);
-        //发送者帐号
         String fromUser = message.getFromUser();
-        log.info("发送者账号：" + fromUser);
-        //开发者微信号
         String touser = message.getToUser();
-        log.info("开发者微信：" + touser);
-        //文本消息  文本内容
         String text = message.getContent();
-        log.info("文本消息：" + text);
+
+        String cacheKey = HashUtils.getHash(StringUtils.join(fromUser, text));
+
+        boolean flag = RedisUtils.setIfAbsent(stringRedisTemplate, cacheKey, text, 5, TimeUnit.SECONDS);
+
+        if (!flag) {
+            Thread.sleep(10000);
+            return "";
+        }
+
+//        log.info("微信入参：{}", message.toString());
+        if (flag) {
+            log.info("消息类型:" + messageType);
+            log.info("发送者账号：" + fromUser);
+            log.info("开发者微信：" + touser);
+            log.info("文本消息：" + text);
+        }
+
         // 事件推送
         if (messageType.equals("event")) {
             log.info("event：" + message.getEvent());
@@ -93,7 +108,7 @@ public class WxMpMsgController {
                         .TEXT()
                         .toUser(fromUser)
                         .fromUser(touser)
-                        .content("Thanks for subscribe.Ask me anything.")
+                        .content("谢谢关注，你可以问我任何问题。")
                         .build();
 
                 String result = texts.toXml();
@@ -130,7 +145,7 @@ public class WxMpMsgController {
                     .TEXT()
                     .toUser(fromUser)
                     .fromUser(touser)
-                    .content(chatGptService.reply(text, fromUser))
+                    .content(chatGptService.reply(text, fromUser, cacheKey))
                     .build();
             String result = texts.toXml();
             log.info("响应给用户的消息：" + result);

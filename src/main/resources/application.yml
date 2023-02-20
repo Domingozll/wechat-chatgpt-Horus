@@ -2,7 +2,8 @@ server:
   port: 8080
 
 openapi:
-  key: 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
+#  key: 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
+  key: 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
 
 wx:
   mp:

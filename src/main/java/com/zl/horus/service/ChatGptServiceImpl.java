@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -43,36 +44,54 @@ public class ChatGptServiceImpl implements ChatGptService {
      */
     private final String Ai = "Horus:";
 
+    private final String CONTENT_KEY_PRFIX = "content-key:";
+
+    private final Map<String, String> localCache = new ConcurrentHashMap<String, String>(1000);
+
     @Override
-    public String reply(String messageContent, String userKey) {
+    public String reply(String messageContent, String userKey, String cacheKey) {
+        String contentKey = CONTENT_KEY_PRFIX + cacheKey;
+        RedisUtils redisUtils = new RedisUtils(stringRedisTemplate);
+        if (redisUtils.hasKey(contentKey)) {
+            JSONObject obj = JSON.parseObject(redisUtils.get(contentKey));
+            return getString(userKey, redisUtils, obj, false);
+        }
+
         // 默认信息
         String message = "Human:你好\nHorus:你好\n";
-        RedisUtils redisUtils = new RedisUtils(stringRedisTemplate);
         if (redisUtils.hasKey(userKey)) {
             // 如果存在key，拿出来
             message = redisUtils.get(userKey);
         }
         // 拼接字符,设置回去
         message = message + human + messageContent + "\n";
-        redisUtils.setEx(userKey, message, 60, TimeUnit.SECONDS);
-        // 调用接口获取数据
         JSONObject obj = getReplyFromGPT(message);
+        new Thread(() -> {
+            redisUtils.setEx(contentKey, obj.toJSONString(), 60, TimeUnit.SECONDS);
+        }).start();
+        // 调用接口获取数据
+        return getString(userKey, redisUtils, obj, true);
+    }
+
+    private String getString(String userKey, RedisUtils redisUtils, JSONObject obj, boolean chcheMsg) {
         MessageResponseBody messageResponseBody = JSONObject.toJavaObject(obj, MessageResponseBody.class);
-        // 存储对话内容，让机器人更加智能
         if (messageResponseBody != null) {
             if (!CollectionUtils.isEmpty(messageResponseBody.getChoices())) {
                 String replyText = messageResponseBody.getChoices().get(0).getText();
                 // 拼接字符,设置回去
-                new Thread(() -> {
-                    String msg = redisUtils.get(userKey);
-                    msg = msg + Ai + replyText + "\n";
-                    redisUtils.setEx(userKey, msg, 60, TimeUnit.SECONDS);
-                }).start();
+                if (chcheMsg) {
+                    new Thread(() -> {
+                        String msg = redisUtils.get(userKey);
+                        msg = msg + Ai + replyText + "\n";
+                        // 存储对话内容，让机器人更加智能
+                        redisUtils.setEx(userKey, msg, 60, TimeUnit.SECONDS);
+                    }).start();
+                }
                 return replyText.replace("Horus:", "")
                         .replace("Horus:", "");
             }
         }
-        return "暂时不明白你说什么!";
+        return "很抱歉，我出了点故障，让我休息一会儿!";
     }
 
     private JSONObject getReplyFromGPT(String message) {
@@ -83,10 +102,11 @@ public class ChatGptServiceImpl implements ChatGptService {
         MessageSendBody messageSendBody = buildConfig();
         messageSendBody.setPrompt(message);
         String body = JSON.toJSONString(messageSendBody, SerializerFeature.PrettyFormat, SerializerFeature.WriteMapNullValue, SerializerFeature.WriteDateUseDateFormat);
-        log.info("发送的数据：" + body);
+        log.info("向chatGpt发送的数据：" + body);
         // 发送请求
         String data = HttpUtil.doPostJson(url, body, header);
         JSONObject obj = JSON.parseObject(data);
+        log.info("chatGpt响应的数据：" + obj);
         return obj;
     }
 
@@ -137,6 +157,6 @@ public class ChatGptServiceImpl implements ChatGptService {
                 return replyText.replace("Horus:", "");
             }
         }
-        return "暂时不明白你说什么!";
+        return "很抱歉，我出了点故障，让我休息一会儿!";
     }
 }

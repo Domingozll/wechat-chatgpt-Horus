@@ -10,5 +10,5 @@ public interface ChatGptService {
      * @param userKey
      * @return
      */
-    String reply(String messageContent, String userKey);
+    String reply(String messageContent, String userKey,String cacheKey);
 }
